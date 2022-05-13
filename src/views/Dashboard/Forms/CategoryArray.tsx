@@ -1,10 +1,17 @@
 import React from 'react'
 import { useFieldArray } from 'react-hook-form'
 import NestedArray from 'views/Dashboard/Forms/ItemsFieldArray'
+import { Control, UseFormRegister } from 'react-hook-form'
+import { RequestForm } from 'views/Dashboard/Forms/CreateRequest'
 
-
-export default function Fields({ control, register }) {
-  const { fields, append, remove, prepend } = useFieldArray({
+const CagegoryFields = ({
+  control,
+  register,
+}: {
+  control: Control<RequestForm>
+  register: UseFormRegister<RequestForm>
+}) => {
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'request',
   })
@@ -23,7 +30,7 @@ export default function Fields({ control, register }) {
             <div className="flex mt-1 ">
               <input
                 type="text"
-                {...register(`request[${index}].category`)}
+                {...register(`request.${index}.items`)}
                 defaultValue={item.category}
                 className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               />
@@ -51,54 +58,9 @@ export default function Fields({ control, register }) {
         >
           Add Category
         </button>
-        {/* <button
-          type="button"
-          onClick={() => {
-            append({ name: 'append' })
-          }}
-        >
-          append
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setValue('test', [
-              ...getValues().test,
-              {
-                name: 'append',
-                nestedArray: [{ field1: 'append', field2: 'append' }],
-              },
-            ])
-          }}
-        >
-          Append Nested
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            prepend({ name: 'append' })
-          }}
-        >
-          prepend
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setValue('test', [
-              {
-                name: 'append',
-                nestedArray: [{ field1: 'Prepend', field2: 'Prepend' }],
-              },
-              ...getValues().test,
-            ])
-          }}
-        >
-          prepend Nested
-        </button> */}
       </section>
     </>
   )
 }
+
+export default CagegoryFields

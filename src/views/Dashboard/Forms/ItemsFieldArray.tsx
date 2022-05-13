@@ -1,10 +1,18 @@
 import React from 'react'
-import { useFieldArray } from 'react-hook-form'
-
-export default ({ nestIndex, control, register }) => {
+import { useFieldArray, Control, UseFormRegister } from 'react-hook-form'
+import { RequestForm } from 'views/Dashboard/Forms/CreateRequest'
+export default ({
+  nestIndex,
+  control,
+  register,
+}: {
+  nestIndex: number
+  control: Control<RequestForm>
+  register: UseFormRegister<RequestForm>
+}) => {
   const { fields, remove, append } = useFieldArray({
     control,
-    name: `request[${nestIndex}].items`,
+    name: `request.${nestIndex}.items`,
   })
 
   return (
@@ -17,24 +25,11 @@ export default ({ nestIndex, control, register }) => {
       </label>
       {fields.map((item, index) => {
         return (
-          //   <div key={item.id} style={{ marginLeft: 20 }}>
-          //     <label>Nested Array:</label>
-          //     <input
-          //       {...register(`test[${nestIndex}].nestedArray[${k}].field1`)}
-          //       defaultValue={item.field1}
-          //       style={{ marginRight: '25px' }}
-          //     />
-
-          //     <button type="button" onClick={() => remove(k)}>
-          //       Delete Nested
-          //     </button>
-
-          //   </div>
           <div key={item.id}>
             <div className="flex mt-1 ">
               <input
                 type="text"
-                {...register(`request[${nestIndex}].items[${index}].name`)}
+                {...register(`request.${nestIndex}.items.${index}.name`)}
                 defaultValue={item.name}
                 placeholder="Name"
                 className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -64,7 +59,7 @@ export default ({ nestIndex, control, register }) => {
           Add Item
         </button>
       </div>
-      <hr className='mt-4' />
+      <hr className="mt-4" />
     </div>
   )
 }

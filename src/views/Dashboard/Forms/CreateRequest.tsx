@@ -1,7 +1,7 @@
 import { Fragment, FC } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
-import { useForm } from 'react-hook-form'
+import { useForm,SubmitHandler } from 'react-hook-form'
 import CategoryArray from 'views/Dashboard/Forms/CategoryArray'
 import { useUser } from '@supabase/supabase-auth-helpers/react'
 import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs'
@@ -13,7 +13,7 @@ interface CreateRequestProps {
   setOpen: (open: boolean) => void
 }
 
-interface RequestForm {
+export interface RequestForm {
   request: {
     category: string
     items: { name: string }[]
@@ -45,7 +45,7 @@ const CreateRequestform: FC<CreateRequestProps> = ({ open, setOpen }) => {
   const { user, error } = useUser()
   const queryClient = useQueryClient()
 
-  const onSubmit = async (requestData) => {
+  const onSubmit:SubmitHandler<RequestForm> = async (requestData) => {
     if (!user?.id) {
       toast.error('Please Log In')
     }
@@ -135,38 +135,6 @@ const CreateRequestform: FC<CreateRequestProps> = ({ open, setOpen }) => {
                                 errors,
                               }}
                             />
-                            {/* <div>
-                              <label
-                                htmlFor="project-name"
-                                className="block text-sm font-medium text-gray-900"
-                              >
-                                Category
-                              </label>
-                              <div className="mt-1">
-                                <input
-                                  type="text"
-                                  {...register('category')}
-                                  className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
-                              </div>
-                            </div> */}
-                            {/* <div>
-                              <label
-                                htmlFor="description"
-                                className="block text-sm font-medium text-gray-900"
-                              >
-                                Description{' '}
-                              </label>
-                              <div className="mt-1">
-                                <textarea
-                                  id="description"
-                                  name="description"
-                                  rows={4}
-                                  className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                  defaultValue={''}
-                                />
-                              </div>
-                            </div> */}
                             <div></div>
                           </div>
                         </div>
