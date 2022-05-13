@@ -30,7 +30,7 @@ const CagegoryFields = ({
             <div className="flex mt-1 ">
               <input
                 type="text"
-                {...register(`request.${index}.items`)}
+                {...register(`request.${index}.category`)}
                 defaultValue={item.category}
                 className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               />

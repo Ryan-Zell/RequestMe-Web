@@ -31,8 +31,6 @@ const Requests = ({
 }) => {
   const [requestsState, setRequestsState] = useState(sortByOrder(requests))
 
-  console.log({ requests })
-
   useEffect(() => {
     setRequestsState(sortByOrder(requests))
   }, [requests])
@@ -45,13 +43,6 @@ const Requests = ({
     if (result.destination.index === result.source.index) {
       return
     }
-
-    console.log({
-      updatingOrder: {
-        order: result.destination.index,
-        id: parseInt(result.draggableId),
-      },
-    })
 
     const reorderedRequets = reorder(
       requestsState,
@@ -71,18 +62,11 @@ const Requests = ({
         console.log({ upsertResponse: data })
       })
 
-    console.log({
-      upsert: reorderedRequets.map((request, index) => ({
-        order: index,
-        id: request.id,
-      })),
-    })
-
     setRequestsState(reorderedRequets)
   }
   return (
-    <div className="flex flex-col">
-      <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
         <span className="text-xl font-bold">Requests</span>
         <button
           type="button"
@@ -92,6 +76,11 @@ const Requests = ({
           <PlusIcon className="w-5 h-5 mr-2 -ml-1" aria-hidden="true" />
           New Request
         </button>
+      </div>
+      <div>
+        <p className="text-sm text-gray-500">
+          Drag request to reorder them
+        </p>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
