@@ -1,21 +1,26 @@
-import { Fragment, FC } from 'react'
+import { Fragment, FC, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
-import { useForm,SubmitHandler } from 'react-hook-form'
+import { useForm, SubmitHandler } from 'react-hook-form'
 import CategoryArray from 'views/Dashboard/Forms/CategoryArray'
 import { useUser } from '@supabase/supabase-auth-helpers/react'
 import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs'
 import { toast } from 'react-hot-toast'
 import { useQueryClient } from 'react-query'
+import { Request } from 'hooks/useRequests'
+import { RequestItem } from '../Requests/Request'
 
 interface CreateRequestProps {
   open: boolean
   setOpen: (open: boolean) => void
+  selectedRequestItems: RequestItem[] | null
 }
 
 export interface RequestForm {
   request: {
     category: string
+    created_at?: string
+    requestId?: string
     items: { name: string }[]
   }[]
 }
@@ -29,7 +34,11 @@ const defaultValues = {
   ],
 }
 
-const CreateRequestform: FC<CreateRequestProps> = ({ open, setOpen }) => {
+const CreateRequestform: FC<CreateRequestProps> = ({
+  open,
+  setOpen,
+  selectedRequestItems,
+}) => {
   const {
     control,
     register,
@@ -39,39 +48,70 @@ const CreateRequestform: FC<CreateRequestProps> = ({ open, setOpen }) => {
     reset,
     setValue,
   } = useForm<RequestForm>({
-    defaultValues,
+    defaultValues: selectedRequestItems ?  {}:defaultValues,
   })
 
   const { user, error } = useUser()
   const queryClient = useQueryClient()
 
-  const onSubmit:SubmitHandler<RequestForm> = async (requestData) => {
+  console.log({ selectedRequestItems })
+
+  useEffect(() => {
+    if (selectedRequestItems) {
+      reset({ request: selectedRequestItems })
+    }
+  }, [selectedRequestItems])
+
+  const onSubmit: SubmitHandler<RequestForm> = async (requestData) => {
     if (!user?.id) {
       toast.error('Please Log In')
     }
-    const { data, error } = await supabaseClient
-      .from('Request')
-      .insert({ userId: user?.id })
-      .single()
-    if (data) {
-      toast.success('Request saved successfully')
-      const requestRequestNormalized = requestData.request.map((item) => ({
+    if (selectedRequestItems) {
+      console.log([requestData])
+      const updateRequestRequestNormalized = requestData.request.map((item) => ({
         ...item,
-        requestId: data.id,
       }))
+      console.log({updateRequestRequestNormalized})
+      const { data: updateRequestItemData, error: updateRequestItemError } =
+      await supabaseClient
+        .from('RequestItem')
+        .upsert(updateRequestRequestNormalized)
 
-      const { data: requestItemData, error: requestItemError } =
-        await supabaseClient
-          .from('RequestItem')
-          .insert(requestRequestNormalized)
-      if (requestItemData) {
-        toast.success('Requst items saved successfully')
-        reset()
-        queryClient.invalidateQueries('requests')
-        setOpen(false)
-      }
-      if (requestItemError) {
-        toast.error(requestItemError.message)
+        if (updateRequestItemData) {
+          toast.success('Requst items saved successfully')
+          reset()
+          queryClient.invalidateQueries('requests')
+          setOpen(false)
+        }
+        if (updateRequestItemError) {
+          toast.error(updateRequestItemError.message)
+        }
+    } else {
+      const { data, error } = await supabaseClient
+        .from('Request')
+        .insert({ userId: user?.id })
+
+        .single()
+      if (data) {
+        toast.success('Request saved successfully')
+        const requestRequestNormalized = requestData.request.map((item) => ({
+          ...item,
+          requestId: data.id,
+        }))
+
+        const { data: requestItemData, error: requestItemError } =
+          await supabaseClient
+            .from('RequestItem')
+            .insert(requestRequestNormalized)
+        if (requestItemData) {
+          toast.success('Requst items saved successfully')
+          reset()
+          queryClient.invalidateQueries('requests')
+          setOpen(false)
+        }
+        if (requestItemError) {
+          toast.error(requestItemError.message)
+        }
       }
     }
     if (error) {
@@ -102,7 +142,9 @@ const CreateRequestform: FC<CreateRequestProps> = ({ open, setOpen }) => {
                       <div className="px-4 py-6 bg-indigo-700 sm:px-6">
                         <div className="flex items-center justify-between">
                           <Dialog.Title className="text-lg font-medium text-white">
-                            New Request
+                            {selectedRequestItems
+                              ? 'Edit Request'
+                              : ' New Request'}
                           </Dialog.Title>
                           <div className="flex items-center ml-3 h-7">
                             <button

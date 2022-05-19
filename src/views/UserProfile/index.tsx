@@ -1,11 +1,11 @@
-import { Switch } from '@headlessui/react'
 import useUserProfile from 'hooks/useUserProfile'
-import React, { useEffect, useState } from 'react'
-import classNames from 'classnames'
+import React, { useEffect } from 'react'
 import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs'
 import { toast } from 'react-hot-toast'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useUser } from '@supabase/supabase-auth-helpers/react'
+import { ShareIcon } from '@heroicons/react/solid'
+import { useClipboard } from 'use-clipboard-copy'
 
 interface UserProfile {
   id: number
@@ -20,6 +20,7 @@ interface UserProfile {
 const UserProfile = () => {
   const { data }: { data: UserProfile | undefined } = useUserProfile()
   const { user, error } = useUser()
+  const clipboard = useClipboard()
 
   const { register, reset, handleSubmit } = useForm<Partial<UserProfile>>({
     defaultValues: {
@@ -50,18 +51,38 @@ const UserProfile = () => {
     }
   }
 
+  const handleClipoboardCopy = () => {
+    const url = `${window.location.origin}/p/${user?.id}`
+    clipboard.copy(url)
+    toast.success('Copied to clipboard')
+  }
+
   return (
     <form
-      className="divide-y divide-gray-200 lg:col-span-9"
+      className="bg-white divide-y divide-gray-200 lg:col-span-9"
       onSubmit={handleSubmit(onSubmit)}
     >
       {/* Profile section */}
       <div className="px-4 py-6 sm:p-6 lg:pb-8">
-        <div>
-          <h2 className="text-lg font-medium leading-6 text-gray-900">
-            Profile
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">Your profile information</p>
+        <div className="flex justify-between ">
+          <div>
+            <h2 className="text-lg font-medium leading-6 text-gray-900">
+              Profile
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Your profile information
+            </p>
+          </div>
+          <div>
+            <button
+              type="button"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              onClick={handleClipoboardCopy}
+            >
+              <ShareIcon className="w-5 h-5 mr-2 -ml-1" aria-hidden="true" />
+              Share Link
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-12 gap-6 mt-6">

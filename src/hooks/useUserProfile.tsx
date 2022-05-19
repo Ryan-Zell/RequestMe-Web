@@ -13,20 +13,24 @@ interface UserProfile {
   websiteUrl: string
 }
 
-export default () => {
+export default (userId?: string) => {
   const { user, error } = useUser()
+
+  const userIdNormalized = userId ? userId : user?.id ?? ''
+
+  console.log({ userIdNormalized })
   return useQuery(
     ['user-info'],
     () =>
       supabaseClient
         .from<UserProfile>('UserInfo')
         .select('*')
-        .eq('userId', user?.id ?? '')
+        .eq('userId', userIdNormalized)
         .single()
         .then(handleSupabaseError)
         .then(({ data }) => data),
     {
-      enabled: !!user,
-    },
+      enabled: !!userIdNormalized,
+    }
   )
 }

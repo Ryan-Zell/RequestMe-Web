@@ -9,6 +9,7 @@ import {
   DropResult,
 } from 'react-beautiful-dnd'
 import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs'
+import { RequestItem } from './Request'
 
 const reorder = (list: Request[], startIndex: number, endIndex: number) => {
   const result = Array.from(list)
@@ -25,11 +26,19 @@ const sortByOrder = (requests: Request[]) => {
 const Requests = ({
   requests,
   setCreateModalOpen,
+  setSelectedRequestItems
 }: {
   requests: Request[]
-  setCreateModalOpen: (open: boolean) => void
+  setCreateModalOpen: (open: boolean) => void,
+  setSelectedRequestItems: (request: RequestItem[] | null) => void,
 }) => {
   const [requestsState, setRequestsState] = useState(sortByOrder(requests))
+
+
+  const handleSetSelectedRequestItems = (items: RequestItem[]) => {
+    setCreateModalOpen(true)
+    setSelectedRequestItems(items)
+  }
 
   useEffect(() => {
     setRequestsState(sortByOrder(requests))
@@ -78,9 +87,7 @@ const Requests = ({
         </button>
       </div>
       <div>
-        <p className="text-sm text-gray-500">
-          Drag request to reorder them
-        </p>
+        <p className="text-sm text-gray-500">Drag request to reorder them</p>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -94,7 +101,11 @@ const Requests = ({
             >
               {requestsState.map((request, index) => (
                 <Fragment key={request.id}>
-                  <RequestComp request={request} index={index} />
+                  <RequestComp
+                    request={request}
+                    index={index}
+                    handleSetSelectedRequestItems={handleSetSelectedRequestItems}
+                  />
                   {provided.placeholder}
                 </Fragment>
               ))}
