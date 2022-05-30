@@ -8,11 +8,10 @@ import { useRouter } from 'next/router'
 const LoginPage: NextPage = () => {
   const { isLoading, user, error } = useUser()
 
-
   const router = useRouter()
 
   useEffect(() => {
-    if(user){
+    if (user) {
       router.push('/dashboard')
     }
   }, [user])
@@ -29,7 +28,14 @@ const LoginPage: NextPage = () => {
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-              <div className="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
+              <div className="flex flex-col px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
+                <div className='flex justify-center '>
+                  <img
+                    className="w-auto h-16"
+                    src="/images/logo.png"
+                    alt="Workflow"
+                  />
+                </div>
                 <Auth
                   supabaseClient={supabaseClient}
                   socialLayout="horizontal"
@@ -43,11 +49,7 @@ const LoginPage: NextPage = () => {
       </>
     )
 
-  return (
-    <>
-    </>
-  )
+  return <></>
 }
 
 export default LoginPage
-
