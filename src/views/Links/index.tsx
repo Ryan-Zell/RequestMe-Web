@@ -1,42 +1,50 @@
 import React, { useState } from 'react'
-import CreateRequest from 'views/Dashboard/Forms/CreateRequest'
+import CreateLink from 'views/Links/Forms/CreateLink'
 import { useUser } from '@supabase/supabase-auth-helpers/react'
 import useRequests from 'hooks/useRequests'
 import Loader from 'components/Loader'
-import Requests from 'views/Dashboard/Requests'
-import Empty from 'views/Dashboard/Empty'
-import { RequestItem } from './Requests/Request'
+import Links from 'views/Links/Links'
+import useLinks, { LinkInterface } from 'hooks/useLinks'
+import Empty from 'views/Links/Empty'
 
 const DashboardView = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const { user, error } = useUser()
 
-  const { data, isLoading } = useRequests({ userId: user?.id })
-  const [selectedRequestItems, setSelectedRequestItems] = useState<RequestItem[] | null>(null)
+  const { data, isLoading } = useLinks({ userId: user?.id })
+  const [selectedLink, setSelectedLink] = useState<
+  LinkInterface | null
+  >(null)
 
   const closeModal = () => {
     setCreateModalOpen(false)
-    setSelectedRequestItems(null)
+    setSelectedLink(null)
   }
 
+  
 
   if (isLoading || !user) {
     return <Loader />
   }
 
+  console.log({ data })
 
   return (
     <div>
       {data.length > 0 ? (
-        <Requests
-          requests={data}
+        <Links
+          links={data}
           setCreateModalOpen={setCreateModalOpen}
-          setSelectedRequestItems={setSelectedRequestItems}
+          setSelectedLink={setSelectedLink}
         />
       ) : (
         <Empty setCreateModalOpen={setCreateModalOpen} />
       )}
-      <CreateRequest open={createModalOpen} setOpen={closeModal}  selectedRequestItems={selectedRequestItems}/>
+      <CreateLink
+        open={createModalOpen}
+        setOpen={closeModal}
+        selectedLink={selectedLink}
+      />
     </div>
   )
 }

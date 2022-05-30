@@ -14,12 +14,13 @@ import {
   XIcon,
 } from '@heroicons/react/outline'
 import { SearchIcon } from '@heroicons/react/solid'
+import { useRouter } from 'next/router'
 
 import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs'
 
 const navigation = [
   { name: 'Requests', href: '/dashboard', icon: CollectionIcon, current: true },
-  { name: 'Links', href: '#', icon: LinkIcon, current: false },
+  { name: 'Links', href: '/dashboard/links', icon: LinkIcon, current: false },
 ]
 const userNavigation = [
   { name: 'Your Profile', href: '/dashboard/user-profile' },
@@ -31,6 +32,9 @@ function classNames(...classes: string[]) {
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const router = useRouter()
+
+  console.log({ path: router.pathname })
 
   return (
     <>
@@ -87,36 +91,39 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </Transition.Child>
                 <div className="flex items-center flex-shrink-0 px-4">
                   <img
-                    className="w-auto h-8"
-                    src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg"
+                    className="w-auto h-16"
+                    src="/images/logo.png"
                     alt="Workflow"
                   />
                 </div>
                 <div className="flex-1 h-0 mt-5 overflow-y-auto">
                   <nav className="px-2 space-y-1">
-                    {navigation.map((item) => (
-                      <a
-                        key={item.name}
-                        href={item.href}
-                        className={classNames(
-                          item.current
-                            ? 'bg-gray-100 text-gray-900'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                          'group flex items-center rounded-md px-2 py-2 text-base font-medium'
-                        )}
-                      >
-                        <item.icon
+                    {navigation.map((item) => {
+                      const isActive = router.pathname === item.href
+                      return (
+                        <a
+                          key={item.name}
+                          href={item.href}
                           className={classNames(
-                            item.current
-                              ? 'text-gray-500'
-                              : 'text-gray-400 group-hover:text-gray-500',
-                            'mr-4 h-6 w-6 flex-shrink-0'
+                            isActive
+                              ? 'bg-gray-100 text-gray-900'
+                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                            'group flex items-center rounded-md px-2 py-2 text-base font-medium'
                           )}
-                          aria-hidden="true"
-                        />
-                        {item.name}
-                      </a>
-                    ))}
+                        >
+                          <item.icon
+                            className={classNames(
+                              isActive
+                                ? 'text-gray-500'
+                                : 'text-gray-400 group-hover:text-gray-500',
+                              'mr-4 h-6 w-6 flex-shrink-0'
+                            )}
+                            aria-hidden="true"
+                          />
+                          {item.name}
+                        </a>
+                      )
+                    })}
                   </nav>
                 </div>
               </div>
@@ -133,36 +140,39 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex flex-col flex-grow pt-5 overflow-y-auto bg-white border-r border-gray-200">
             <div className="flex items-center flex-shrink-0 px-4">
               <img
-                className="w-auto h-8"
-                src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg"
+                className="w-auto h-16"
+                src="/images/logo.png"
                 alt="Workflow"
               />
             </div>
             <div className="flex flex-col flex-grow mt-5">
               <nav className="flex-1 px-2 pb-4 space-y-1">
-                {navigation.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className={classNames(
-                      item.current
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                      'group flex items-center rounded-md px-2 py-2 text-sm font-medium'
-                    )}
-                  >
-                    <item.icon
+                {navigation.map((item) => {
+                  const isActive = router.pathname === item.href
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.href}
                       className={classNames(
-                        item.current
-                          ? 'text-gray-500'
-                          : 'text-gray-400 group-hover:text-gray-500',
-                        'mr-3 h-6 w-6 flex-shrink-0'
+                        isActive
+                          ? 'bg-gray-100 text-gray-900'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                        'group flex items-center rounded-md px-2 py-2 text-sm font-medium'
                       )}
-                      aria-hidden="true"
-                    />
-                    {item.name}
-                  </a>
-                ))}
+                    >
+                      <item.icon
+                        className={classNames(
+                          isActive
+                            ? 'text-gray-500'
+                            : 'text-gray-400 group-hover:text-gray-500',
+                          'mr-3 h-6 w-6 flex-shrink-0'
+                        )}
+                        aria-hidden="true"
+                      />
+                      {item.name}
+                    </a>
+                  )
+                })}
               </nav>
             </div>
           </div>

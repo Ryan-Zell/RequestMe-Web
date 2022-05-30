@@ -7,37 +7,23 @@ import { useUser } from '@supabase/supabase-auth-helpers/react'
 import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs'
 import { toast } from 'react-hot-toast'
 import { useQueryClient } from 'react-query'
-import { Request } from 'hooks/useRequests'
-import { RequestItem } from '../Requests/Request'
+import { LinkInterface } from 'hooks/useLinks'
 
 interface CreateRequestProps {
   open: boolean
   setOpen: (open: boolean) => void
-  selectedRequestItems: RequestItem[] | null
+  selectedLink: LinkInterface | null
 }
 
-export interface RequestForm {
-  request: {
-    category: string
-    created_at?: string
-    requestId?: string
-    items: { name: string }[]
-  }[]
-}
-
-const defaultValues = {
-  request: [
-    {
-      category: 'category name',
-      items: [{ name: 'item name' }],
-    },
-  ],
+export interface LinkForm {
+  url: string
+  type: 'payment' | 'outside' | 'footer'
 }
 
 const CreateRequestform: FC<CreateRequestProps> = ({
   open,
   setOpen,
-  selectedRequestItems,
+  selectedLink,
 }) => {
   const {
     control,
@@ -47,73 +33,57 @@ const CreateRequestform: FC<CreateRequestProps> = ({
     getValues,
     reset,
     setValue,
-  } = useForm<RequestForm>({
-    defaultValues: selectedRequestItems ?  {}:defaultValues,
+  } = useForm<LinkForm>({
+    defaultValues: selectedLink
+      ? {}
+      : {
+          type: 'payment',
+        },
   })
 
   const { user, error } = useUser()
   const queryClient = useQueryClient()
 
-  console.log({ selectedRequestItems })
-
   useEffect(() => {
-    if (selectedRequestItems) {
-      reset({ request: selectedRequestItems })
+    if (selectedLink) {
+      reset(selectedLink)
     }
-  }, [selectedRequestItems])
+  }, [selectedLink])
 
-  const onSubmit: SubmitHandler<RequestForm> = async (requestData) => {
+  const onSubmit: SubmitHandler<LinkForm> = async (linkData) => {
+    console.log({ linkData })
     if (!user?.id) {
       toast.error('Please Log In')
     }
-    if (selectedRequestItems) {
-      const updateRequestRequestNormalized = requestData.request.map((item) => ({
-        ...item,
-      }))
-      const { data: updateRequestItemData, error: updateRequestItemError } =
-      await supabaseClient
-        .from('RequestItem')
-        .upsert(updateRequestRequestNormalized)
 
-        if (updateRequestItemData) {
-          toast.success('Requst items saved successfully')
-          reset()
-          queryClient.invalidateQueries('requests')
-          setOpen(false)
-        }
-        if (updateRequestItemError) {
-          toast.error(updateRequestItemError.message)
-        }
-    } else {
-      const { data, error } = await supabaseClient
-        .from('Request')
-        .insert({ userId: user?.id })
+    let normalizedLinkData = {
+      ...linkData,
+      userId: user?.id,
+    }
 
-        .single()
-      if (data) {
-        toast.success('Request saved successfully')
-        const requestRequestNormalized = requestData.request.map((item) => ({
-          ...item,
-          requestId: data.id,
-        }))
-
-        const { data: requestItemData, error: requestItemError } =
-          await supabaseClient
-            .from('RequestItem')
-            .insert(requestRequestNormalized)
-        if (requestItemData) {
-          toast.success('Requst items saved successfully')
-          reset()
-          queryClient.invalidateQueries('requests')
-          setOpen(false)
-        }
-        if (requestItemError) {
-          toast.error(requestItemError.message)
-        }
+    if (selectedLink) {
+      normalizedLinkData = {
+        ...selectedLink,
+        ...linkData,
+        userId: user?.id,
       }
     }
+
+    const { data, error } = await supabaseClient
+      .from('Link')
+      .upsert(normalizedLinkData)
+
+    if (data) {
+      if (selectedLink) {
+        toast.success('Link updated successfully')
+      } else {
+        toast.success('Link saved successfully')
+      }
+      reset()
+      queryClient.invalidateQueries('links')
+      setOpen(false)
+    }
     if (error) {
-      console.log(error)
       toast.error(error.message)
     }
   }
@@ -140,9 +110,7 @@ const CreateRequestform: FC<CreateRequestProps> = ({
                       <div className="px-4 py-6 bg-indigo-700 sm:px-6">
                         <div className="flex items-center justify-between">
                           <Dialog.Title className="text-lg font-medium text-white">
-                            {selectedRequestItems
-                              ? 'Edit Request'
-                              : ' New Request'}
+                            {selectedLink ? 'Edit Link' : ' New Link'}
                           </Dialog.Title>
                           <div className="flex items-center ml-3 h-7">
                             <button
@@ -158,24 +126,57 @@ const CreateRequestform: FC<CreateRequestProps> = ({
                         <div className="mt-1">
                           <p className="text-sm text-indigo-300">
                             Get started by filling in the information below to
-                            create your new Request.
+                            create your new Link.
                           </p>
                         </div>
                       </div>
                       <div className="flex flex-col justify-between flex-1">
                         <div className="px-4 divide-y divide-gray-200 sm:px-6">
                           <div className="pt-6 pb-5 space-y-6">
-                            <CategoryArray
-                              {...{
-                                control,
-                                register,
-                                defaultValues,
-                                getValues,
-                                setValue,
-                                errors,
-                              }}
-                            />
-                            <div></div>
+                            <div>
+                              <label
+                                htmlFor="location"
+                                className="block text-sm font-medium text-gray-700"
+                              >
+                                Link Type
+                              </label>
+                              <select
+                                className="block w-full py-2 pl-3 pr-10 mt-1 text-base border-gray-300 rounded-md focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                defaultValue="Canada"
+                                {...register('type', {
+                                  required: 'Type is required',
+                                })}
+                              >
+                                <option value="payment">Payment</option>
+                                <option value="outside">Outside Link</option>
+                                <option value="footer">Footer Link</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor="street-address"
+                                className="block text-sm font-medium text-gray-700"
+                              >
+                                URL
+                              </label>
+                              <div className="mt-1">
+                                <input
+                                  type="text"
+                                  {...register('url', {
+                                    required: 'Type is required',
+                                    pattern: {
+                                      value:
+                                        /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
+                                      message: 'Enter a valid url',
+                                    },
+                                  })}
+                                  className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                              </div>
+                              {errors.url && (
+                                <div className="mt-1 ml-2 text-sm text-red-600">{errors.url.message}</div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
