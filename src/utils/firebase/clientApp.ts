@@ -12,6 +12,8 @@ const clientCredentials = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+//
+
 // Initialize Firebase
 export const app = initializeApp(clientCredentials);
 export const analytics = getAnalytics(app);
